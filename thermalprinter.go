@@ -7,6 +7,16 @@ import (
 	"unicode/utf8"
 )
 
+// Character commands
+const (
+	InverseMask      = 1 << 1
+	UpdownMask       = 1 << 2
+	BoldMask         = 1 << 3
+	DoubleHeightMask = 1 << 4
+	DoubleWidthMask  = 1 << 5
+	StrikeMask       = 1 << 6
+)
+
 type Printer struct {
 	port            *serial.Port
 	timeout         int
@@ -20,7 +30,7 @@ type Printer struct {
 	charHeight      int
 	lineSpacing     int
 	barcodeHeight   int
-	printMode       int
+	printMode       byte
 	defaultHeatTime int
 }
 
@@ -213,7 +223,37 @@ func (p *Printer) SetDefalut() {
 */
 
 func (p *Printer) writePrintMode() {
-	p.writeBytes([]byte{27, 33, byte(p.printMode)})
+	p.writeBytes([]byte{27, 33, p.printMode})
+}
+
+func (p *Printer) setPrintMode(mask byte) {
+	p.printMode |= mask
+	p.writePrintMode()
+	if p.printMode&DoubleHeightMask != 0 {
+		p.charHeight = 48
+	} else {
+		p.charHeight = 24
+	}
+	if p.printMode&DoubleWidthMask != 0 {
+		p.maxColumn = 16
+	} else {
+		p.maxColumn = 32
+	}
+}
+
+func (p *Printer) unsetPrintMode(mask byte) {
+	p.printMode &= ^mask
+	p.writePrintMode()
+	if p.printMode&DoubleHeightMask != 0 {
+		p.charHeight = 48
+	} else {
+		p.charHeight = 24
+	}
+	if p.printMode&DoubleWidthMask != 0 {
+		p.maxColumn = 16
+	} else {
+		p.maxColumn = 32
+	}
 }
 
 func (p *Printer) PrintBitmap(w int, h int, bitmap []byte, lineAtATime bool) error {
