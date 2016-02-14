@@ -212,6 +212,10 @@ func (p *Printer) SetDefalut() {
 }
 */
 
+func (p *Printer) writePrintMode() {
+	p.writeBytes([]byte{27, 33, byte(p.printMode)})
+}
+
 func (p *Printer) PrintBitmap(w int, h int, bitmap []byte, lineAtATime bool) error {
 	rowBytes := int(float64(w+7) / 8) // Round up to next byte boundary
 	rowBytesClipped := 0
