@@ -256,6 +256,59 @@ func (p *Printer) unsetPrintMode(mask byte) {
 	}
 }
 
+func (p *Printer) normal() {
+	p.printMode = 0
+	p.writePrintMode()
+}
+
+func (p *Printer) inverseOn() {
+	p.setPrintMode(InverseMask)
+}
+
+func (p *Printer) inverseOff() {
+	p.unsetPrintMode(InverseMask)
+}
+
+func (p *Printer) upsideDownOn() {
+	p.setPrintMode(UpdownMask)
+}
+
+func (p *Printer) upsideDownOff() {
+	p.unsetPrintMode(UpdownMask)
+}
+
+func (p *Printer) doubleHeightOn() {
+	p.setPrintMode(DoubleHeightMask)
+}
+
+func (p *Printer) doubleHeightOff() {
+	p.unsetPrintMode(DoubleHeightMask)
+}
+
+func (p *Printer) doubleWidthOn() {
+	p.setPrintMode(DoubleWidthMask)
+}
+
+func (p *Printer) doubleWidthOff() {
+	p.unsetPrintMode(DoubleWidthMask)
+}
+
+func (p *Printer) strikeOn() {
+	p.setPrintMode(StrikeMask)
+}
+
+func (p *Printer) strikeOff() {
+	p.unsetPrintMode(StrikeMask)
+}
+
+func (p *Printer) boldOn() {
+	p.setPrintMode(BoldMask)
+}
+
+func (p *Printer) boldOff() {
+	p.unsetPrintMode(BoldMask)
+}
+
 func (p *Printer) PrintBitmap(w int, h int, bitmap []byte, lineAtATime bool) error {
 	rowBytes := int(float64(w+7) / 8) // Round up to next byte boundary
 	rowBytesClipped := 0
