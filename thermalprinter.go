@@ -3,6 +3,7 @@ package thermalprinter
 import (
 	"fmt"
 	"github.com/tarm/serial"
+	"strings"
 	"time"
 	"unicode/utf8"
 )
@@ -307,6 +308,19 @@ func (p *Printer) boldOn() {
 
 func (p *Printer) boldOff() {
 	p.unsetPrintMode(BoldMask)
+}
+
+func (p *Printer) justify(value string) {
+	var pos byte
+	switch strings.ToUpper(value) {
+	case "C":
+		pos = 1
+	case "R":
+		pos = 2
+	default:
+		pos = 0
+	}
+	p.writeBytes([]byte{0x1B, 0x61, pos})
 }
 
 func (p *Printer) PrintBitmap(w int, h int, bitmap []byte, lineAtATime bool) error {
