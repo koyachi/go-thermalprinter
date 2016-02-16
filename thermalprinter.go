@@ -323,6 +323,18 @@ func (p *Printer) justify(value string) {
 	p.writeBytes([]byte{0x1B, 0x61, pos})
 }
 
+// Feeds by the specified number of lines
+func (p *Printer) feed(x ...int) {
+	_x := 1
+	if x != nil && len(x) == 1 {
+		_x = x[0]
+	}
+	for _x > 0 {
+		p.Print("\n")
+		_x -= 1
+	}
+}
+
 func (p *Printer) PrintBitmap(w int, h int, bitmap []byte, lineAtATime bool) error {
 	rowBytes := int(float64(w+7) / 8) // Round up to next byte boundary
 	rowBytesClipped := 0
