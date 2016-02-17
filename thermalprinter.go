@@ -335,6 +335,12 @@ func (p *Printer) feed(x ...int) {
 	}
 }
 
+// Feed by the specified number of indivisual pixel rows
+func (p *Printer) feedRows(rows int) {
+	p.writeBytes([]byte{27, 74, byte(rows)})
+	p.timeoutSet(float64(rows) * p.dotFeedTime)
+}
+
 func (p *Printer) PrintBitmap(w int, h int, bitmap []byte, lineAtATime bool) error {
 	rowBytes := int(float64(w+7) / 8) // Round up to next byte boundary
 	rowBytesClipped := 0
