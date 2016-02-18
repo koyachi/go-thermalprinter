@@ -341,6 +341,45 @@ func (p *Printer) feedRows(rows int) {
 	p.timeoutSet(float64(rows) * p.dotFeedTime)
 }
 
+func (p *Printer) setSize(value string) {
+	var size byte
+	switch strings.ToUpper(value) {
+	case "L":
+		// Large: double width and height
+		size = 0x11
+		p.charHeight = 48
+		p.maxColumn = 16
+	case "M":
+		// Medium: double height
+		size = 0x01
+		p.charHeight = 48
+		p.maxColumn = 32
+	default:
+		// Small: standard width and height
+		size = 0x00
+		p.charHeight = 24
+		p.maxColumn = 32
+	}
+	p.writeBytes([]byte{29, 33, size, 10})
+	p.prevByte = newlineByte() // Setting the size adds a linefeed
+}
+
+// Underlines of different weights can be produced:
+// 0 - no underline
+// 1 - normal underline
+// 2 - thick underline
+func (p *Printer) underlineOn(weight ...int) {
+	_weight := 1
+	if weight != nil && len(weight) == 1 {
+		_weight = weight[0]
+	}
+	p.writeBytes([]byte{27, 45, byte(_weight)})
+}
+
+func (p *Printer) underlineOff() {
+	p.underlineOn(0)
+}
+
 func (p *Printer) PrintBitmap(w int, h int, bitmap []byte, lineAtATime bool) error {
 	rowBytes := int(float64(w+7) / 8) // Round up to next byte boundary
 	rowBytesClipped := 0
