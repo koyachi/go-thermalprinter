@@ -18,6 +18,20 @@ const (
 	StrikeMask       = 1 << 6
 )
 
+const (
+	UPC_A = iota
+	UPC_E
+	EAN13
+	EAN8
+	CODE39
+	I25
+	CODEBAR
+	CODE93
+	CODE128
+	CODE11
+	MSI
+)
+
 type Printer struct {
 	port            *serial.Port
 	timeout         int
@@ -222,6 +236,32 @@ func (p *Printer) SetDefalut() {
 	p.setSize("s")
 }
 */
+
+func (p *Printer) printBarcode(text string, barcodeType int) {
+	p.writeBytes([]byte{
+		29, 72, 2, // Print label below barcodeType
+		29, 119, 3, // Barcode width
+		29, 107, byte(barcodeType), // Barcode type
+	})
+	// Print string
+	p.timeoutWait()
+	p.timeoutSet(float64(p.barcodeHeight+40) * p.dotPrintTime)
+	p.port.Write([]byte(text))
+	p.prevByte = newlineByte()
+	p.feed(2)
+}
+
+func (p *Printer) setBarcodeHeight(val ...int) {
+	_val := 50
+	if val != nil && len(val) == 1 {
+		_val = val[0]
+	}
+	if _val < 1 {
+		_val = 1
+	}
+	p.barcodeHeight = _val
+	p.writeBytes([]byte{29, 104, byte(_val)})
+}
 
 func (p *Printer) writePrintMode() {
 	p.writeBytes([]byte{27, 33, p.printMode})
