@@ -1,4 +1,7 @@
 
+_printertest:
+	GOOS=linux GOARCH=arm go build -o bin/printertest -v github.com/koyachi/go-thermalprinter/printertest/printertest
+
 helloworld:
 	GOOS=linux GOARCH=arm go build -o bin/helloworld -v github.com/koyachi/go-thermalprinter/printertest/helloworld
 

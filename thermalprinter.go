@@ -223,21 +223,19 @@ func (p *Printer) Reset() {
 	p.writeBytes([]byte{27, 64})
 }
 
-/*
-func (p *Printer) SetDefalut() {
-	p.online()
-	p.justify("L")
-	p.inverseOff()
-	p.doubleHeightOff()
-	p.setLineHeight(32)
-	p.boldOff()
-	p.underlineOff()
-	p.setBarcodeHeight(50)
-	p.setSize("s")
+func (p *Printer) SetDefault() {
+	p.Online()
+	p.Justify("L")
+	p.InverseOff()
+	p.DoubleHeightOff()
+	p.SetLineHeight(32)
+	p.BoldOff()
+	p.UnderlineOff()
+	p.SetBarcodeHeight(50)
+	p.SetSize("s")
 }
-*/
 
-func (p *Printer) printBarcode(text string, barcodeType int) {
+func (p *Printer) PrintBarcode(text string, barcodeType int) {
 	p.writeBytes([]byte{
 		29, 72, 2, // Print label below barcodeType
 		29, 119, 3, // Barcode width
@@ -248,10 +246,10 @@ func (p *Printer) printBarcode(text string, barcodeType int) {
 	p.timeoutSet(float64(p.barcodeHeight+40) * p.dotPrintTime)
 	p.port.Write([]byte(text))
 	p.prevByte = newlineByte()
-	p.feed(2)
+	p.Feed(2)
 }
 
-func (p *Printer) setBarcodeHeight(val ...int) {
+func (p *Printer) SetBarcodeHeight(val ...int) {
 	_val := 50
 	if val != nil && len(val) == 1 {
 		_val = val[0]
@@ -297,60 +295,60 @@ func (p *Printer) unsetPrintMode(mask byte) {
 	}
 }
 
-func (p *Printer) normal() {
+func (p *Printer) Normal() {
 	p.printMode = 0
 	p.writePrintMode()
 }
 
-func (p *Printer) inverseOn() {
+func (p *Printer) InverseOn() {
 	p.setPrintMode(InverseMask)
 }
 
-func (p *Printer) inverseOff() {
+func (p *Printer) InverseOff() {
 	p.unsetPrintMode(InverseMask)
 }
 
-func (p *Printer) upsideDownOn() {
+func (p *Printer) UpsideDownOn() {
 	p.setPrintMode(UpdownMask)
 }
 
-func (p *Printer) upsideDownOff() {
+func (p *Printer) UpsideDownOff() {
 	p.unsetPrintMode(UpdownMask)
 }
 
-func (p *Printer) doubleHeightOn() {
+func (p *Printer) DoubleHeightOn() {
 	p.setPrintMode(DoubleHeightMask)
 }
 
-func (p *Printer) doubleHeightOff() {
+func (p *Printer) DoubleHeightOff() {
 	p.unsetPrintMode(DoubleHeightMask)
 }
 
-func (p *Printer) doubleWidthOn() {
+func (p *Printer) DoubleWidthOn() {
 	p.setPrintMode(DoubleWidthMask)
 }
 
-func (p *Printer) doubleWidthOff() {
+func (p *Printer) DoubleWidthOff() {
 	p.unsetPrintMode(DoubleWidthMask)
 }
 
-func (p *Printer) strikeOn() {
+func (p *Printer) StrikeOn() {
 	p.setPrintMode(StrikeMask)
 }
 
-func (p *Printer) strikeOff() {
+func (p *Printer) StrikeOff() {
 	p.unsetPrintMode(StrikeMask)
 }
 
-func (p *Printer) boldOn() {
+func (p *Printer) BoldOn() {
 	p.setPrintMode(BoldMask)
 }
 
-func (p *Printer) boldOff() {
+func (p *Printer) BoldOff() {
 	p.unsetPrintMode(BoldMask)
 }
 
-func (p *Printer) justify(value string) {
+func (p *Printer) Justify(value string) {
 	var pos byte
 	switch strings.ToUpper(value) {
 	case "C":
@@ -364,7 +362,7 @@ func (p *Printer) justify(value string) {
 }
 
 // Feeds by the specified number of lines
-func (p *Printer) feed(x ...int) {
+func (p *Printer) Feed(x ...int) {
 	_x := 1
 	if x != nil && len(x) == 1 {
 		_x = x[0]
@@ -376,12 +374,12 @@ func (p *Printer) feed(x ...int) {
 }
 
 // Feed by the specified number of indivisual pixel rows
-func (p *Printer) feedRows(rows int) {
+func (p *Printer) FeedRows(rows int) {
 	p.writeBytes([]byte{27, 74, byte(rows)})
 	p.timeoutSet(float64(rows) * p.dotFeedTime)
 }
 
-func (p *Printer) setSize(value string) {
+func (p *Printer) SetSize(value string) {
 	var size byte
 	switch strings.ToUpper(value) {
 	case "L":
@@ -404,11 +402,25 @@ func (p *Printer) setSize(value string) {
 	p.prevByte = newlineByte() // Setting the size adds a linefeed
 }
 
+func (p *Printer) SetLineHeight(val ...int) {
+	_val := 24
+	if val != nil && len(val) == 1 {
+		_val = val[0]
+	}
+	p.lineSpacing = _val - 24
+
+	// The printer doesn't take into account the current text
+	// height when setting line height, making this more skin
+	// to inter-line spacing. Default line spacing is 32
+	// (char height of 24, line spacing of 8).
+	p.writeBytes([]byte{27, 51, byte(_val)})
+}
+
 // Underlines of different weights can be produced:
 // 0 - no underline
 // 1 - normal underline
 // 2 - thick underline
-func (p *Printer) underlineOn(weight ...int) {
+func (p *Printer) UnderlineOn(weight ...int) {
 	_weight := 1
 	if weight != nil && len(weight) == 1 {
 		_weight = weight[0]
@@ -416,8 +428,8 @@ func (p *Printer) underlineOn(weight ...int) {
 	p.writeBytes([]byte{27, 45, byte(_weight)})
 }
 
-func (p *Printer) underlineOff() {
-	p.underlineOn(0)
+func (p *Printer) UnderlineOff() {
+	p.UnderlineOn(0)
 }
 
 func (p *Printer) PrintBitmap(w int, h int, bitmap []byte, lineAtATime bool) error {
@@ -479,6 +491,17 @@ func (p *Printer) PrintBitmap(w int, h int, bitmap []byte, lineAtATime bool) err
 func (p *Printer) SetTimes(pt float64, ft float64) {
 	p.dotPrintTime = pt
 	p.dotFeedTime = ft
+}
+
+// Take the printer offline. Print commands sent after this
+// will be ignored until 'online' is called.
+func (p *Printer) Offline() {
+	p.writeBytes([]byte{27, 61, 0})
+}
+
+// Take the printer online, Subsequent print commands will be obeyed.
+func (p *Printer) Online() {
+	p.writeBytes([]byte{27, 61, 1})
 }
 
 func (p *Printer) Sleep() {
